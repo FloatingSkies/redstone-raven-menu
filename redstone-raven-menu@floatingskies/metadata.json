@@ -1,8 +1,8 @@
 {
     "uuid": "redstone-raven-menu@floatingskies",
     "name": "Redstone Raven Menu",
-    "description": "An Windows 10-like/Budgie-like raven menu",
+    "description": "An Windows 10-like/Budgie-like Raven Menu for Cinnamon Desktop",
     "icon": "system-settings",
-    "version": "Milestone 1",
+    "version": "v1.1",
     "max-instances": 1
 }

@@ -1,11 +1,79 @@
-.popup-menu-item.button-background {
-    padding: 5px 10px;
-    margin: 5px;
-    border-radius: 8px;
+.popup-menu-content {
     background-color: transparent;
-    transition: background-color 0.3s ease;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 
-.popup-menu-item.button-background:hover {
-    background-color: #4CAF50;
-    color: white; 
+.popup-menu-item.title {
+    font-size: 18px;
+    font-weight: bold;
+    color: inherit;
+    margin-bottom: 20px;
+}
+
+.popup-menu-item.notification-label {
+    font-size: 16px;
+    color: inherit;
+    margin-bottom: 10px;
+}
+
+.popup-menu-item.notification-text {
+    font-size: 14px;
+    color: inherit;
+}
+
+.popup-menu-item.volume-label {
+    font-size: 16px;
+    color: inherit; 
+    margin-top: 20px;
+}
+
+.popup-menu-item.wifi-label {
+    font-size: 16px;
+    color: inherit;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.popup-menu-item.wifi-privacy-label {
+    font-size: 14px;
+    color: inherit;
+}
+
+.popup-menu-item.wifi-no-networks {
+    font-size: 14px;
+    color: inherit;
+}
+
+.popup-menu-item.wifi-button {
+    font-size: 14px;
+    color: inherit;
+    background-color: transparent;
+    padding: 10px;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.popup-menu-item.wifi-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Buttons */
+.popup-menu-item.refresh-button,
+.popup-menu-item.network-button,
+.popup-menu-item.privacy-button {
+    font-size: 14px;
+    color: inherit;
+    background-color: transparent;
+    padding: 10px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.popup-menu-item.refresh-button:hover,
+.popup-menu-item.network-button:hover,
+.popup-menu-item.privacy-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+

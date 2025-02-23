@@ -5,10 +5,11 @@ const PopupMenu = imports.ui.popupMenu;
 const Slider = imports.ui.slider;
 const Gio = imports.gi.Gio;
 const Util = imports.misc.util;
+const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 const GLib = imports.gi.GLib;
 
-const UUID = "redstone-raven-menu@floatingskies";
+const UUID = "notification-sidebar@your-name";
 
 class NotificationSidebar extends Applet.TextIconApplet {
     constructor(metadata, orientation, panelHeight, instanceId) {
@@ -18,8 +19,9 @@ class NotificationSidebar extends Applet.TextIconApplet {
             this.set_applet_icon_name("preferences-system");
             this.set_applet_tooltip("Open Action Center");
 
-            this.isPrivacyModeActive = false;
-            this.notifications = [];
+            this.menuManager = new PopupMenu.PopupMenuManager(this);
+            this.menu = new Applet.AppletPopupMenu(this, orientation);
+            this.menuManager.addMenu(this.menu);
 
             let sidebar = new St.BoxLayout({
                 vertical: true,
@@ -31,80 +33,86 @@ class NotificationSidebar extends Applet.TextIconApplet {
                 y_align: Clutter.ActorAlign.FILL,
             });
 
-            this.menu = new Applet.AppletPopupMenu(this, orientation);
             this.menu.box.add(sidebar);
+
 
             let title = new St.Label({
                 text: "Action Center",
-                style_class: "popup-menu-item",
+                style_class: "popup-menu-item title",
             });
             sidebar.add_child(title);
 
-            this.notificationBox = new St.BoxLayout({
-                vertical: true,
-                style_class: "popup-menu-content",
-                style: "padding: 10px;",
+            let notificationLabel = new St.Label({
+                text: "Latest Notification:",
+                style_class: "popup-menu-item notification-label",
             });
-            sidebar.add_child(this.notificationBox);
+            sidebar.add_child(notificationLabel);
 
-            let clearNotificationsButton = new St.Button({
-                label: "Clear Notifications",
-                style_class: "popup-menu-item button-background",
+            let notificationBox = new St.BoxLayout({
+                vertical: true,
+                style_class: "popup-menu-content notification-box",
             });
-            clearNotificationsButton.connect("clicked", () => {
-                this.clearNotifications();
+            let notificationText = new St.Label({
+                text: "No new notifications.",
+                style_class: "popup-menu-item notification-text",
             });
-            sidebar.add_child(clearNotificationsButton);
+            notificationBox.add_child(notificationText);
+            sidebar.add_child(notificationBox);
 
             let volumeLabel = new St.Label({
                 text: "Volume",
-                style_class: "popup-menu-item",
+                style_class: "popup-menu-item volume-label",
             });
             this.volumeSlider = new Slider.Slider(0.5);
-            this.volumeSlider.actor.set_style("padding: 10px; min-height: 20px;");
-            this.volumeSlider.connect("value-changed", (_, value) => this.changeVolume(value));
+            this.volumeSlider.actor.set_style("padding: 10px; min-height: 30px;");
+            this.volumeSlider.connect("value-changed", Lang.bind(this, this.changeVolume));
 
             sidebar.add_child(volumeLabel);
             sidebar.add_child(this.volumeSlider.actor);
 
             let wifiLabel = new St.Label({
                 text: "Available Wi-Fi Networks",
-                style_class: "popup-menu-item",
+                style_class: "popup-menu-item wifi-label",
             });
             sidebar.add_child(wifiLabel);
 
             this.wifiBox = new St.BoxLayout({
                 vertical: true,
-                style_class: "popup-menu-content",
-                style: "padding: 10px; border-radius: 8px;",
+                style_class: "popup-menu-content wifi-box",
             });
             sidebar.add_child(this.wifiBox);
 
-            let privacyButton = new St.Button({
-                label: "Enable Privacy Mode",
-                style_class: "popup-menu-item button-background",
-            });
-            privacyButton.connect("clicked", () => this.togglePrivacyMode(privacyButton));
-            sidebar.add_child(privacyButton);
-
             this.updateWifiList();
-            this.listenForNotifications();
 
             let refreshButton = new St.Button({
                 label: "Refresh Networks",
-                style_class: "popup-menu-item button-background",
+                style_class: "popup-menu-item refresh-button",
             });
-            refreshButton.connect("clicked", () => this.updateWifiList());
+            refreshButton.connect("clicked", () => {
+                this.updateWifiList();
+            });
             sidebar.add_child(refreshButton);
 
             let networkButton = new St.Button({
                 label: "Open Network Settings",
-                style_class: "popup-menu-item button-background",
+                style_class: "popup-menu-item network-button",
             });
-            networkButton.connect("clicked", () => Util.spawnCommandLine("nm-connection-editor"));
+            networkButton.connect("clicked", () => {
+                Util.spawnCommandLine("nm-connection-editor");
+            });
             sidebar.add_child(networkButton);
+
+            this.privacyModeButton = new St.Button({
+                label: "Privacy Mode: Disabled",
+                style_class: "popup-menu-item privacy-button",
+            });
+            this.privacyModeButton.connect("clicked", Lang.bind(this, this.togglePrivacyMode));
+            sidebar.add_child(this.privacyModeButton);
+
+            this.privacyMode = false;
+
         } catch (e) {
-            global.logError("Error loading Notification Sidebar: " + e);
+            global.logError("Error loading the Notification Sidebar: " + e);
         }
     }
 
@@ -112,7 +120,7 @@ class NotificationSidebar extends Applet.TextIconApplet {
         this.menu.toggle();
     }
 
-    changeVolume(value) {
+    changeVolume(slider, value) {
         let volume = Math.round(value * 100);
         Util.spawnCommandLine(`pactl set-sink-volume @DEFAULT_SINK@ ${volume}%`);
     }
@@ -120,61 +128,43 @@ class NotificationSidebar extends Applet.TextIconApplet {
     updateWifiList() {
         this.wifiBox.destroy_all_children();
 
-        if (this.isPrivacyModeActive) {
-            this.wifiBox.add_child(new St.Label({ text: "Wi-Fi networks are hidden.", style_class: "popup-menu-item" }));
-            return;
-        }
-
-        let [ok, out] = GLib.spawn_command_line_sync("nmcli -t -f SSID dev wifi");
-        if (!ok) return;
-
-        let networks = out.toString().split("\n").filter(ssid => ssid.trim() !== "");
-        networks.forEach(ssid => {
-            let wifiButton = new St.Button({ label: ssid, style_class: "popup-menu-item button-background" });
-            wifiButton.connect("clicked", () => Util.spawnCommandLine(`nmcli dev wifi connect "${ssid}"`));
-            this.wifiBox.add_child(wifiButton);
-        });
-    }
-
-    togglePrivacyMode(button) {
-        this.isPrivacyModeActive = !this.isPrivacyModeActive;
-        button.label = this.isPrivacyModeActive ? "Disable Privacy Mode" : "Enable Privacy Mode";
-        this.updateWifiList();
-    }
-
-    listenForNotifications() {
-        Gio.DBus.session.signal_subscribe(
-            null,
-            "org.freedesktop.Notifications",
-            "Notify",
-            null,
-            null,
-            Gio.DBusSignalFlags.NONE,
-            (_, sender, path, iface, signal, params) => {
-                let notificationData = params.deep_unpack();
-                let summary = notificationData[3];
-                let body = notificationData[4] || "";
-                this.notifications.push(`${summary}: ${body}`);
-                this.refreshNotificationBox();
-            }
-        );
-    }
-
-    refreshNotificationBox() {
-        this.notificationBox.destroy_all_children();
-
-        if (this.notifications.length === 0) {
-            this.notificationBox.add_child(new St.Label({ text: "No new notifications.", style_class: "popup-menu-item" }));
-        } else {
-            this.notifications.slice(-5).forEach(notification => {
-                this.notificationBox.add_child(new St.Label({ text: notification, style_class: "popup-menu-item" }));
+        if (this.privacyMode) {
+            let privacyLabel = new St.Label({
+                text: "Wi-Fi networks are hidden in Privacy Mode.",
+                style_class: "popup-menu-item wifi-privacy-label",
             });
+            this.wifiBox.add_child(privacyLabel);
+        } else {
+            let [ok, out] = GLib.spawn_command_line_sync("nmcli -t -f SSID dev wifi");
+            if (!ok) return;
+
+            let networks = out.toString().split("\n").filter(ssid => ssid.trim() !== "");
+
+            if (networks.length === 0) {
+                let noWifiLabel = new St.Label({
+                    text: "No networks found.",
+                    style_class: "popup-menu-item wifi-no-networks",
+                });
+                this.wifiBox.add_child(noWifiLabel);
+            } else {
+                networks.forEach(ssid => {
+                    let wifiButton = new St.Button({
+                        label: ssid,
+                        style_class: "popup-menu-item wifi-button",
+                    });
+                    wifiButton.connect("clicked", () => {
+                        Util.spawnCommandLine(`nmcli dev wifi connect "${ssid}"`);
+                    });
+                    this.wifiBox.add_child(wifiButton);
+                });
+            }
         }
     }
 
-    clearNotifications() {
-        this.notifications = [];
-        this.refreshNotificationBox();
+    togglePrivacyMode() {
+        this.privacyMode = !this.privacyMode;
+        this.privacyModeButton.set_label(this.privacyMode ? "Privacy Mode: Enabled" : "Privacy Mode: Disabled");
+        this.updateWifiList(); 
     }
 }
 
