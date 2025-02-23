@@ -1,0 +1,8 @@
+{
+    "uuid": "redstone-raven-menu@floatingskies",
+    "name": "Redstone Raven Menu",
+    "description": "An Windows 10-like/Budgie-like raven menu",
+    "icon": "system-settings",
+    "version": "Milestone 1",
+    "max-instances": 1
+}

@@ -1,0 +1,11 @@
+.popup-menu-item.button-background {
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 8px;
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+.popup-menu-item.button-background:hover {
+    background-color: #4CAF50;
+    color: white; 
