@@ -9,3 +9,12 @@ Wi-Fi Management – View available networks and connect with a single click.
 Privacy Mode – Hide Wi-Fi networks when privacy is enabled.
 Volume Control – Adjust system volume via a smooth slider.
 Quick Actions – Clear notifications, refresh Wi-Fi networks, and access network settings effortlessly.
+
+HOW TO INSTALL
+Clone the repository:
+
+git clone (https://github.com/FloatingSkies/redstone-raven-menu)
+
+Move the folder to Cinnamon’s user applet directory:
+
+mv redstone-raven-menu@floatingskies ~/.local/share/cinnamon/applets/
