@@ -13,7 +13,7 @@ Quick Actions – Clear notifications, refresh Wi-Fi networks, and access networ
 # HOW TO INSTALL
 Clone the repository:
 
-git clone (https://github.com/FloatingSkies/redstone-raven-menu)
+git clone https://github.com/FloatingSkies/redstone-raven-menu
 
 Move the folder to Cinnamon’s user applet directory:
 
