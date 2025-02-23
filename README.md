@@ -10,6 +10,9 @@ Privacy Mode – Hide Wi-Fi networks when privacy is enabled.
 Volume Control – Adjust system volume via a smooth slider.
 Quick Actions – Clear notifications, refresh Wi-Fi networks, and access network settings effortlessly.
 
+![image](https://github.com/user-attachments/assets/49b99b73-fc0e-4357-81c7-68fa93e975c9)
+
+
 # HOW TO INSTALL
 Clone the repository:
 
