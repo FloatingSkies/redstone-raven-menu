@@ -3,6 +3,6 @@
     "name": "Redstone Raven Menu",
     "description": "An Windows 10-like/Budgie-like Raven Menu for Cinnamon Desktop",
     "icon": "system-settings",
-    "version": "v1.1",
+    "version": "Milestone v1.1.1",
     "max-instances": 1
 }
