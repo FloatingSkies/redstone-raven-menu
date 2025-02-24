@@ -9,6 +9,7 @@ Features
 ## Privacy Mode – Hide Wi-Fi networks when privacy is enabled.
 ## Volume Control – Adjust system volume via a smooth slider.
 ## Quick Actions – Clear notifications, refresh Wi-Fi networks, and access network settings effortlessly.
+## GTK Adapted - All your GTK/Cinnamon themes are adapted to work in this
 
 ![image](https://github.com/user-attachments/assets/6cb204e5-63df-4aa2-98f9-ef5ad5141f34)
 
@@ -16,9 +17,10 @@ Features
 
 # HOW TO INSTALL
 Clone the repository:
-
 git clone https://github.com/FloatingSkies/redstone-raven-menu
 
-Move the folder to Cinnamon’s user applet directory:
+Change to the directory
+cd redstone-raven-menu/
 
+Move the folder to Cinnamon’s user applet directory:
 mv redstone-raven-menu@floatingskies ~/.local/share/cinnamon/applets/
